@@ -56,4 +56,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local configuration
-.local/ 
+.local/
+
+# Generated data (keep data/ folder via .gitkeep)
+data/*
+!data/.gitkeep

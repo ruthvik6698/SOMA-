@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Whoop + Tapo — Biometric Lighting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <h1 class="logo">SOMA</h1>
+        <span class="subtitle">Biometric Environment</span>
+      </div>
+      <div class="header-center">
+        <div class="time-badge" id="time-badge">--:--</div>
+        <span class="date-badge" id="date-badge">--</span>
+        <span class="mode-badge" id="mode-badge">—</span>
+      </div>
+      <div class="header-right">
+        <span class="profile-name" id="profile-name">—</span>
+        <span class="connection-dot connection-whoop" id="conn-whoop" title="Whoop"></span>
+        <span class="connection-dot connection-light" id="conn-light" title="Light"></span>
+        <button class="btn-refresh" id="btn-refresh" title="Refresh data">↻</button>
+      </div>
+    </header>
+
+    <main class="main dashboard-layout">
+      <!-- Left column: Light control (sticky) -->
+      <aside class="sidebar-light">
+        <section class="section section-light">
+          <h2 class="section-title">Light</h2>
+          <div class="light-preview">
+            <button class="btn-light-toggle" id="btn-light-toggle">Turn On</button>
+            <button class="btn-light-refresh" id="btn-light-refresh" title="Refresh light state">↻</button>
+            <div class="light-orb" id="light-orb"></div>
+            <div class="light-orb-glow" id="light-orb-glow"></div>
+            <div class="light-info">
+              <span class="status-pill" id="status-pill">—</span>
+              <span class="light-spec" id="light-spec">—</span>
+            </div>
+          </div>
+          <div class="slider-row">
+            <label class="slider-label">Color temp</label>
+            <input type="range" class="slider-cct" id="slider-cct" min="2500" max="6500" step="100" value="4000">
+            <span class="slider-value" id="cct-value">4000K</span>
+          </div>
+          <div class="slider-row">
+            <label class="slider-label">Brightness</label>
+            <input type="range" class="slider-brightness" id="slider-brightness" min="5" max="100" step="5" value="70">
+            <span class="slider-value" id="brightness-value">70%</span>
+          </div>
+          <button class="btn-apply" id="btn-apply" style="display:none">Apply</button>
+          <div class="presets-row">
+            <button class="preset-btn" data-k="5500" data-b="95">Focus</button>
+            <button class="preset-btn" data-k="5000" data-b="85">Work</button>
+            <button class="preset-btn" data-k="3200" data-b="55">Ease</button>
+            <button class="preset-btn" data-k="2700" data-b="25">Wind Down</button>
+            <button class="preset-btn" data-k="2500" data-b="8">Sleep</button>
+          </div>
+          <div class="mood-buttons">
+            <span class="mood-label">Mood</span>
+            <button class="mood-btn" data-mood="stressed">Stressed</button>
+            <button class="mood-btn" data-mood="flat">Flat</button>
+            <button class="mood-btn" data-mood="focused">Focus</button>
+            <button class="mood-btn" data-mood="winding_down">Wind Down</button>
+          </div>
+          <div class="chips-row">
+            <button class="chip" data-msg="Warmer">Warmer</button>
+            <button class="chip" data-msg="Cooler">Cooler</button>
+            <button class="chip" data-msg="Brighter">Brighter</button>
+            <button class="chip" data-msg="Dimmer">Dimmer</button>
+            <button class="chip" data-msg="Bedtime mode">Bedtime mode</button>
+            <button class="chip" data-msg="Wake me up">Wake me up</button>
+          </div>
+          <div class="command-input">
+            <input type="text" id="command-input" placeholder="e.g. make it warmer, dim a bit..." autocomplete="off">
+            <button class="btn-send" id="btn-send">Send</button>
+          </div>
+          <div class="command-reply" id="command-reply"></div>
+        </section>
+      </aside>
+
+      <!-- Right column: content -->
+      <div class="content-right">
+        <!-- Metrics row -->
+        <section class="section section-metrics">
+          <h2 class="section-title">Today</h2>
+          <div class="metrics-grid">
+            <div class="metric-card metric-recovery" id="card-recovery">
+              <div class="metric-ring-wrap" id="recovery-ring-wrap"></div>
+              <span class="metric-label">Recovery</span>
+              <span class="metric-value" id="recovery-value">—</span>
+              <span class="metric-context" id="recovery-context">—</span>
+            </div>
+            <div class="metric-card metric-hrv" id="card-hrv">
+              <span class="metric-label">HRV</span>
+              <div class="metric-hrv-bar" id="hrv-bar"></div>
+              <span class="metric-value" id="hrv-value">—</span>
+              <span class="metric-context" id="hrv-context">—</span>
+            </div>
+            <div class="metric-card metric-sleep" id="card-sleep">
+              <span class="metric-label">Sleep</span>
+              <div class="metric-sleep-stages" id="sleep-stages"></div>
+              <span class="metric-value" id="sleep-value">—</span>
+              <span class="metric-context" id="sleep-context">—</span>
+            </div>
+            <div class="metric-card metric-strain" id="card-strain">
+              <span class="metric-label">Strain</span>
+              <div class="metric-strain-gauge" id="strain-gauge"></div>
+              <span class="metric-value" id="strain-value">—</span>
+            </div>
+            <div class="metric-card metric-rhr" id="card-rhr">
+              <span class="metric-label">Resting HR</span>
+              <span class="metric-value" id="rhr-value">—</span>
+              <span class="metric-context" id="rhr-context">—</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Timeline -->
+        <section class="section section-timeline">
+          <h2 class="section-title">Schedule</h2>
+          <div class="timeline-wrap" id="timeline-wrap"></div>
+          <details class="schedule-details">
+            <summary>List view</summary>
+            <div class="schedule-list" id="schedule-list"></div>
+          </details>
+        </section>
+
+        <!-- Bedtime panel -->
+        <section class="section section-bedtime">
+          <h2 class="section-title">Tonight</h2>
+          <div class="bedtime-panel" id="bedtime-panel">
+            <div class="bedtime-times">
+              <span>Recommended: <strong id="bedtime-rec">—</strong></span>
+              <span>Latest: <strong id="bedtime-latest">—</strong></span>
+            </div>
+            <div class="sleep-pressure-row">
+              <span>Sleep pressure:</span>
+              <div class="sleep-pressure-dots" id="sleep-pressure-dots"></div>
+            </div>
+            <div class="bedtime-meta">
+              <span>Wake target: 05:45 IST</span>
+              <span>Projected: <span id="bedtime-projected">—</span></span>
+            </div>
+            <p class="bedtime-reasoning" id="bedtime-reasoning">—</p>
+            <button class="btn-bedtime-signal" id="btn-bedtime-signal">Send bedtime signal now</button>
+          </div>
+        </section>
+
+        <!-- Baselines & Context -->
+        <section class="section section-baselines">
+          <h2 class="section-title">Baselines</h2>
+          <div class="baselines-grid">
+            <div class="baseline-item"><span class="baseline-label">HRV avg</span><span class="baseline-value" id="baseline-hrv">—</span></div>
+            <div class="baseline-item"><span class="baseline-label">Recovery avg</span><span class="baseline-value" id="baseline-recovery">—</span></div>
+            <div class="baseline-item"><span class="baseline-label">Sleep avg</span><span class="baseline-value" id="baseline-sleep">—</span></div>
+            <div class="baseline-item"><span class="baseline-label">Strain avg</span><span class="baseline-value" id="baseline-strain">—</span></div>
+          </div>
+        </section>
+
+        <section class="section section-context">
+          <h2 class="section-title">Context</h2>
+          <div class="context-card">
+            <div class="weather-row"><span class="weather-label">Weather</span><span class="weather-value" id="weather-value">—</span></div>
+            <div class="plan-row"><span class="plan-label">Plan</span><p class="plan-value" id="plan-value">—</p></div>
+          </div>
+        </section>
+
+        <!-- Alarm -->
+        <section class="section section-alarm">
+          <h2 class="section-title">Alarm</h2>
+          <div class="alarm-card">
+            <div class="alarm-time" id="alarm-time">05:45 IST</div>
+            <div class="alarm-countdown" id="alarm-countdown">—</div>
+            <div class="sunrise-ramp" id="sunrise-ramp"></div>
+            <div class="alarm-hold" id="alarm-hold"></div>
+          </div>
+        </section>
+
+        <!-- Recent jobs -->
+        <section class="section section-jobs">
+          <h2 class="section-title">Recent Jobs</h2>
+          <div class="jobs-list jobs-scroll" id="jobs-list"></div>
+        </section>
+
+        <!-- History -->
+        <section class="section section-history">
+          <h2 class="section-title">History (14 days)</h2>
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Recovery</th>
+                  <th>HRV</th>
+                  <th>Sleep</th>
+                  <th>Strain</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>SOMA — Biometric Environment Controller</span>
+    </footer>
+  </div>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

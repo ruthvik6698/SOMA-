@@ -1,89 +1,134 @@
-# Whoop MCP Server
-Python Package License: MIT Python 3.12
+# SOMA — Biometric Environment Controller
 
-A Model Context Protocol (MCP) server that provides access to the Whoop API. It allows language models to query cycles, recovery, strain, and workout data from the Whoop API.
+> An intelligent environment controller that reads WHOOP biometrics hourly and orchestrates smart lights to match what your body needs at that moment.
 
-## Available Tools
+**SOMA** (System for Optimal Metabolic Adaptation) is a personal automation system that combines wearable physiology data, circadian science, and smart home control. It runs a continuous decision loop: **READ** → **SCORE** → **PRESCRIBE** → **ACT**.
 
-The server exposes the following tools:
+---
 
-### Cycle Queries
-- `get_cycle_collection(start_date: str, end_date: str)`: Get cycle data for a specific date range
-- `get_latest_cycle()`: Get the most recent cycle data
+## Features
 
-### Recovery and Strain
-- `get_recovery_data(start_date: str, end_date: str)`: Get recovery data for a specific date range
-- `get_strain_data(start_date: str, end_date: str)`: Get strain data for a specific date range
-- `get_average_strain(days: int = 7)`: Calculate average strain over specified number of days
+- **WHOOP integration** — Recovery, HRV, sleep, strain drive environment decisions
+- **Personal baselines** — Compares to your 30-day averages, not population norms
+- **Circadian-aware** — Sunrise simulation, wind-down sequences, melatonin protection (hard 2500K cap after 22:00)
+- **Mood overrides** — Quick-tap: Stressed / Flat / Focus / Wind Down (90-min override)
+- **Natural language** — "Make it warmer", "bedtime mode" via OpenAI
+- **Web dashboard** — Metrics, light control, schedule, bedtime recommendations
 
-### Profile and Authentication
-- `get_profile()`: Get user profile information
-- `check_auth_status()`: Check authentication status with Whoop API
+---
 
-Dates should be provided in ISO format (YYYY-MM-DD).
+## Architecture
 
-## Usage
-
-You'll need Whoop credentials to use this server. The server uses email/password authentication with the Whoop API.
-
-### Claude for Desktop
-
-Update your `claude_desktop_config.json` (located in `~/Library/Application\ Support/Claude/claude_desktop_config.json` on macOS and `%APPDATA%/Claude/claude_desktop_config.json` on Windows) to include the following:
-
-```json
-{
-    "mcpServers": {
-        "Whoop": {
-            "command": "python",
-            "args": ["/path/to/whoop/src/whoop_server.py"],
-            "cwd": "/path/to/whoop",
-            "env": {
-                "WHOOP_EMAIL": "your.email@example.com",
-                "WHOOP_PASSWORD": "your_password"
-            }
-        }
-    }
-}
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        SOMA Decision Loop                        │
+│  READ (WHOOP, calendar, weather, mood) → SCORE (vs baselines)   │
+│  → PRESCRIBE (mode from table) → ACT (light, fan placeholder)   │
+└─────────────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+   ┌──────────┐        ┌──────────────┐      ┌─────────────┐
+   │  WHOOP   │        │  Tapo L530   │      │  FastAPI    │
+   │  API     │        │  Smart Bulb  │      │  Dashboard  │
+   └──────────┘        └──────────────┘      └─────────────┘
 ```
 
-### HTTP API Server
+**Tech stack:** Python 3.10+, FastAPI, python-kasa (Tapo), OpenAI, WHOOP v2 API
 
-The project also includes an HTTP API server that exposes the same functionality over HTTP endpoints. To run it:
+---
+
+## Quick Start
 
 ```bash
-./run_whoop_server.sh
+# Clone and setup
+git clone https://github.com/YOUR_USERNAME/whoop.git
+cd whoop
+
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Configure (copy template, fill credentials)
+cp config/.env.example config/.env
+# Edit config/.env with TAPO_*, WHOOP_*, OPENAI_API_KEY
+
+# Run scheduler (automation + CLI)
+./run_scheduler.sh
+# or: ./scripts/run_scheduler.sh
+
+# Or run dashboard (web UI)
+./run_dashboard.sh
+# → http://localhost:8000
 ```
 
-## Example Queries
-
-Once connected, you can ask Claude questions like:
-
-- "What's my recovery score for today?"
-- "Show me my strain data for the past week"
-- "What's my average strain over the last 7 days?"
-- "Get my latest cycle data"
-
-## Error Handling
-
-The server provides human-readable error messages for common issues:
-- Invalid date formats
-- API authentication errors
-- Network connectivity problems
-- Missing or invalid credentials
+---
 
 ## Project Structure
 
 ```
 whoop/
+├── config/          # .env.example (template)
+├── data/            # WHOOP history cache (gitignored)
+├── docs/            # FEATURES.md
+├── frontend/        # Dashboard UI
+├── scripts/         # run_scheduler, run_dashboard, run_light
 ├── src/
-│   ├── whoop_server.py      # MCP server implementation
-│   └── whoop_http_server.py # HTTP API server implementation
-├── config/
-│   └── .env                 # Environment variables
-├── requirements.txt         # Python dependencies
-└── run_whoop_server.sh     # Script to run HTTP server
+│   ├── soma/        # Decision engine (core, modes)
+│   ├── auth.py      # WHOOP OAuth
+│   ├── whoop_api.py # WHOOP v2 client
+│   ├── light.py     # Tapo control
+│   └── ...
+├── scheduler.py     # Main automation entry
+├── server.py        # FastAPI backend
+└── requirements.txt
 ```
+
+---
+
+## Configuration
+
+| Variable | Purpose |
+|----------|---------|
+| `TAPO_IP`, `TAPO_EMAIL`, `TAPO_PASSWORD` | TP-Link Tapo bulb |
+| `WHOOP_CLIENT_ID`, `WHOOP_CLIENT_SECRET` | [developer.whoop.com](https://developer.whoop.com) |
+| `OPENAI_API_KEY` | Natural language commands |
+| `WEATHER_API_KEY`, `WEATHER_LOCATION` | [weatherapi.com](https://weatherapi.com) (optional) |
+
+OAuth runs automatically on first run if WHOOP tokens are missing.
+
+---
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `./run_scheduler.sh` | SOMA automation, sunrise, wind-down, interactive CLI |
+| `./run_dashboard.sh` | Web dashboard (port 8000) |
+| `./run_light.sh on \| off \| status \| brightness 80` | Direct light control (no WHOOP) |
+| `python3 test_light.py` | Verify Tapo connection |
+
+---
+
+## Schedule (IST)
+
+| Time | Job |
+|------|-----|
+| 05:30–05:45 | Sunrise simulation (recovery-adjusted) |
+| 05:45 | Alarm pulse |
+| Hourly | SOMA decision loop |
+| 20:00–22:00 | Wind-down |
+| 22:00 | Hard floor (2500K, 10%) |
+| 22:30 | Bedtime recommendation |
+| 23:00+ | Bedtime signal (blink) |
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+MIT — see [LICENSE](LICENSE)
+
+---
+
+## Documentation
+
+- [docs/FEATURES.md](docs/FEATURES.md) — Full feature reference, API, modes
