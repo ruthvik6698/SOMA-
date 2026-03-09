@@ -7,30 +7,25 @@ Full documentation for the biometric environment controller.
 ## Project Structure
 
 ```
-whoop/
+SOMA-/
 ├── config/
 │   ├── .env              # Your credentials (gitignored)
 │   └── .env.example      # Template
 ├── data/
-│   └── whoop_history.json # Cached WHOOP cycles (90 days)
 ├── docs/
-│   └── FEATURES.md       # This file
+│   └── FEATURES.md
 ├── frontend/
-│   ├── index.html
-│   └── assets/
 ├── logs/                  # scheduler.log, soma.log (gitignored)
 ├── scripts/
-│   ├── run_scheduler.sh
-│   ├── run_dashboard.sh
-│   └── run_light.sh
-├── src/
-│   ├── soma/             # Decision engine
-│   ├── auth.py, baselines.py, calendar.py, data.py
-│   ├── decider.py, devices.py, light.py, light_control.py
-│   ├── mood.py, sleep_prep.py, wake.py, weather.py, whoop_api.py
-├── scheduler.py
-├── server.py
-├── test_light.py
+├── src/soma/              # Main package
+│   ├── config.py
+│   ├── core.py, modes.py
+│   ├── auth.py, whoop_api.py, baselines.py, data.py
+│   ├── light.py, devices.py, weather.py, calendar.py
+│   ├── decider.py, sleep_prep.py, wake.py, mood.py
+│   ├── scheduler.py, server.py, light_control.py
+├── tests/
+├── pyproject.toml
 ├── requirements.txt
 └── LICENSE
 ```
@@ -41,9 +36,9 @@ whoop/
 
 | Command | What it does |
 |---------|--------------|
-| `./run_scheduler.sh` | SOMA automation + interactive CLI |
-| `./run_dashboard.sh` | Web UI at http://localhost:8000 |
-| `./run_light.sh on \| off \| status` | Direct light (hardware test) |
+| `soma-scheduler` or `./run_scheduler.sh` | SOMA automation + interactive CLI |
+| `soma-dashboard` or `./run_dashboard.sh` | Web UI at http://localhost:8000 |
+| `soma-light on \| off \| status` or `./run_light.sh` | Direct light (hardware test) |
 | `python3 test_light.py` | Verify Tapo connection |
 
 ---

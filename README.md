@@ -17,6 +17,94 @@
 
 ---
 
+## Installation
+
+```bash
+git clone https://github.com/ruthvik6698/SOMA-.git
+cd SOMA-
+
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+
+pip install -e .
+```
+
+---
+
+## Configuration
+
+Copy the template and add your credentials:
+
+```bash
+cp config/.env.example config/.env
+# Edit config/.env with your values
+```
+
+| Variable | Purpose |
+|----------|---------|
+| `TAPO_IP`, `TAPO_EMAIL`, `TAPO_PASSWORD` | TP-Link Tapo bulb |
+| `WHOOP_CLIENT_ID`, `WHOOP_CLIENT_SECRET` | [developer.whoop.com](https://developer.whoop.com) |
+| `OPENAI_API_KEY` | Natural language commands |
+| `WEATHER_API_KEY`, `WEATHER_LOCATION` | [weatherapi.com](https://weatherapi.com) (optional) |
+
+OAuth runs automatically on first run if WHOOP tokens are missing.
+
+---
+
+## Usage
+
+### Option 1: CLI commands (after `pip install -e .`)
+
+```bash
+soma-scheduler    # Automation + interactive CLI
+soma-dashboard    # Web UI at http://localhost:8000
+soma-light on     # Direct light control (no WHOOP)
+soma-light status
+```
+
+### Option 2: Scripts
+
+```bash
+./run_scheduler.sh   # or ./scripts/run_scheduler.sh
+./run_dashboard.sh
+./run_light.sh on
+```
+
+### Option 3: Python module
+
+```bash
+python -m soma.scheduler
+python -m uvicorn soma.server:app --host 0.0.0.0 --port 8000
+python -m soma.light_control status
+```
+
+---
+
+## Project Structure
+
+```
+SOMA-/
+├── config/           # .env.example
+├── data/             # WHOOP history cache (gitignored)
+├── docs/             # FEATURES.md
+├── frontend/         # Dashboard UI
+├── scripts/         # run_scheduler, run_dashboard, run_light
+├── src/
+│   └── soma/         # Main package
+│       ├── config.py
+│       ├── core.py, modes.py
+│       ├── auth.py, whoop_api.py, baselines.py, data.py
+│       ├── light.py, devices.py, weather.py, calendar.py
+│       ├── decider.py, sleep_prep.py, wake.py, mood.py
+│       ├── scheduler.py, server.py, light_control.py
+├── tests/
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+```
+
+---
+
 ## Architecture
 
 ```
@@ -37,89 +125,12 @@
 
 ---
 
-## Quick Start
+## Testing
 
 ```bash
-# Clone and setup
-git clone https://github.com/YOUR_USERNAME/whoop.git
-cd whoop
-
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Configure (copy template, fill credentials)
-cp config/.env.example config/.env
-# Edit config/.env with TAPO_*, WHOOP_*, OPENAI_API_KEY
-
-# Run scheduler (automation + CLI)
-./run_scheduler.sh
-# or: ./scripts/run_scheduler.sh
-
-# Or run dashboard (web UI)
-./run_dashboard.sh
-# → http://localhost:8000
+pip install -e ".[dev]"
+pytest tests/ -v
 ```
-
----
-
-## Project Structure
-
-```
-whoop/
-├── config/          # .env.example (template)
-├── data/            # WHOOP history cache (gitignored)
-├── docs/            # FEATURES.md
-├── frontend/        # Dashboard UI
-├── scripts/         # run_scheduler, run_dashboard, run_light
-├── src/
-│   ├── soma/        # Decision engine (core, modes)
-│   ├── auth.py      # WHOOP OAuth
-│   ├── whoop_api.py # WHOOP v2 client
-│   ├── light.py     # Tapo control
-│   └── ...
-├── scheduler.py     # Main automation entry
-├── server.py        # FastAPI backend
-└── requirements.txt
-```
-
----
-
-## Configuration
-
-| Variable | Purpose |
-|----------|---------|
-| `TAPO_IP`, `TAPO_EMAIL`, `TAPO_PASSWORD` | TP-Link Tapo bulb |
-| `WHOOP_CLIENT_ID`, `WHOOP_CLIENT_SECRET` | [developer.whoop.com](https://developer.whoop.com) |
-| `OPENAI_API_KEY` | Natural language commands |
-| `WEATHER_API_KEY`, `WEATHER_LOCATION` | [weatherapi.com](https://weatherapi.com) (optional) |
-
-OAuth runs automatically on first run if WHOOP tokens are missing.
-
----
-
-## Scripts
-
-| Script | Description |
-|--------|-------------|
-| `./run_scheduler.sh` | SOMA automation, sunrise, wind-down, interactive CLI |
-| `./run_dashboard.sh` | Web dashboard (port 8000) |
-| `./run_light.sh on \| off \| status \| brightness 80` | Direct light control (no WHOOP) |
-| `python3 test_light.py` | Verify Tapo connection |
-
----
-
-## Schedule (IST)
-
-| Time | Job |
-|------|-----|
-| 05:30–05:45 | Sunrise simulation (recovery-adjusted) |
-| 05:45 | Alarm pulse |
-| Hourly | SOMA decision loop |
-| 20:00–22:00 | Wind-down |
-| 22:00 | Hard floor (2500K, 10%) |
-| 22:30 | Bedtime recommendation |
-| 23:00+ | Bedtime signal (blink) |
 
 ---
 

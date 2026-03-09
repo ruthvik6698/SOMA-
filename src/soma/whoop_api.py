@@ -3,14 +3,10 @@ Official WHOOP v2 API client.
 """
 import os
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import requests
-from dotenv import load_dotenv
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ENV_PATH = PROJECT_ROOT / "config" / ".env"
-load_dotenv(ENV_PATH)
+from .config import ENV_PATH
 
 BASE_URL = "https://api.prod.whoop.com/developer/v2"
 

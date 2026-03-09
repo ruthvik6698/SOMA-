@@ -5,14 +5,13 @@ import os
 import re
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import requests
 from dotenv import load_dotenv, set_key
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ENV_PATH = PROJECT_ROOT / "config" / ".env"
+from .config import ENV_PATH
+
 load_dotenv(ENV_PATH)
 
 REDIRECT_URI = "http://localhost:8080"

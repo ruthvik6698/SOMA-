@@ -2,18 +2,14 @@
 Tapo L530 light control via python-kasa.
 """
 import os
-from pathlib import Path
 
-from dotenv import load_dotenv
 from kasa import Discover, Module
 
+from .config import get
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / "config" / ".env")
-
-TAPO_IP = os.getenv("TAPO_IP") or os.getenv("TAPO_DEVICE_IP")
-TAPO_EMAIL = os.getenv("TAPO_EMAIL")
-TAPO_PASSWORD = os.getenv("TAPO_PASSWORD")
+TAPO_IP = get("TAPO_IP") or get("TAPO_DEVICE_IP")
+TAPO_EMAIL = get("TAPO_EMAIL")
+TAPO_PASSWORD = get("TAPO_PASSWORD")
 
 
 async def connect_light():

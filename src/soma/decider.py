@@ -4,13 +4,11 @@ Light prescriptions come from SOMA modes; bedtime uses OpenAI.
 """
 import json
 import os
-from pathlib import Path
 
 import pytz
 from openai import OpenAI
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LOG_PATH = PROJECT_ROOT / "logs" / "scheduler.log"
+from .config import SCHEDULER_LOG as LOG_PATH
 IST = pytz.timezone("Asia/Kolkata")
 
 
@@ -27,7 +25,7 @@ def get_plan_and_light(state: dict, weather: dict) -> dict:
     SOMA-driven: run decision loop, return plan + light.
     Replaces old AI-based plan. Plan is derived from mode reason.
     """
-    from src.soma import run_decision_loop
+    from . import run_decision_loop
 
     state["weather"] = weather
     prescription = run_decision_loop(state)
@@ -49,7 +47,7 @@ def get_light_prescription(today: dict, baselines: dict, context: str) -> dict:
     """
     Legacy: returns light for a context. Uses SOMA scoring + mode selection.
     """
-    from src.soma import score_inputs, select_mode, get_mode_prescription, infer_calendar_mode
+    from . import score_inputs, select_mode, get_mode_prescription, infer_calendar_mode
     from datetime import datetime
 
     now = datetime.now(IST)

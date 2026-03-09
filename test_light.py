@@ -4,17 +4,12 @@ Test script to verify Tapo L530 light connection and control.
 Run: python3 test_light.py
 """
 import asyncio
-import os
-from pathlib import Path
 
-from dotenv import load_dotenv
+from soma.config import get
 
-PROJECT_ROOT = Path(__file__).resolve().parent
-load_dotenv(PROJECT_ROOT / "config" / ".env")
-
-TAPO_IP = os.getenv("TAPO_IP") or os.getenv("TAPO_DEVICE_IP")
-TAPO_EMAIL = os.getenv("TAPO_EMAIL")
-TAPO_PASSWORD = os.getenv("TAPO_PASSWORD")
+TAPO_IP = get("TAPO_IP") or get("TAPO_DEVICE_IP")
+TAPO_EMAIL = get("TAPO_EMAIL")
+TAPO_PASSWORD = get("TAPO_PASSWORD")
 
 
 async def test_connection():
@@ -29,11 +24,11 @@ async def test_connection():
     # Method 1: try_connect_all (tries all protocols, works when UDP discovery fails)
     from kasa import Discover, Credentials
 
-    creds = Credentials(username=TAPO_EMAIL, password=TAPO_PASSWORD)
+    creds = Credentials(username=TAPO_EMAIL or "", password=TAPO_PASSWORD or "")
 
     print("1. Trying Discover.try_connect_all (bypasses UDP discovery)...")
     try:
-        dev = await Discover.try_connect_all(TAPO_IP, credentials=creds, timeout=10)
+        dev = await Discover.try_connect_all(TAPO_IP or "", credentials=creds, timeout=10)
         if dev:
             print("   SUCCESS: Connected via try_connect_all")
             await dev.update()
@@ -67,7 +62,7 @@ async def test_connection():
     print("2. Trying Discover.discover_single...")
     try:
         dev = await Discover.discover_single(
-            TAPO_IP, username=TAPO_EMAIL, password=TAPO_PASSWORD, discovery_timeout=10
+            TAPO_IP or "", username=TAPO_EMAIL or "", password=TAPO_PASSWORD or "", discovery_timeout=10
         )
         if dev:
             print("   SUCCESS: Connected via discover_single")

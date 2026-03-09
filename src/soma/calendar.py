@@ -2,12 +2,8 @@
 Google Calendar integration via Composio (placeholder).
 Poll events every 30 min for SOMA decision loop.
 """
-from datetime import datetime
-from pathlib import Path
-
 import pytz
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 IST = pytz.timezone("Asia/Kolkata")
 
 

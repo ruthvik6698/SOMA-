@@ -3,13 +3,9 @@ Weather fetch via WeatherAPI.com. Cached for 10 minutes.
 """
 import os
 import time
-from pathlib import Path
-
 import requests
-from dotenv import load_dotenv
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / "config" / ".env")
+from .config import get
 
 _CACHE = {"data": None, "fetched_at": 0}
 _CACHE_TTL = 600  # 10 minutes
@@ -24,8 +20,8 @@ def get_weather() -> dict:
     if _CACHE["data"] is not None and (now - _CACHE["fetched_at"]) < _CACHE_TTL:
         return _CACHE["data"]
 
-    key = os.getenv("WEATHER_API_KEY")
-    location = os.getenv("WEATHER_LOCATION", "Hyderabad")
+    key = get("WEATHER_API_KEY")
+    location = get("WEATHER_LOCATION") or "Hyderabad"
     if not key:
         return {"temp_c": None, "condition": "unknown", "is_day": 1}
 

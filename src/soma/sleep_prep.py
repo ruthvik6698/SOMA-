@@ -2,10 +2,8 @@
 Evening wind-down (8pm–sleep) and bedtime signal.
 """
 import asyncio
-from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LOG_PATH = PROJECT_ROOT / "logs" / "scheduler.log"
+from .config import SCHEDULER_LOG as LOG_PATH
 
 
 def _log(msg: str):
@@ -52,7 +50,7 @@ def _get_wind_down_preset(tier: str, aggressive: bool) -> tuple[int, int]:
 
 async def evening_start(state: dict):
     """8pm. First wind-down. Preset based on recovery + strain."""
-    from src.light import set_light
+    from .light import set_light
 
     today = state.get("today") or {}
     baselines = state.get("baselines") or {}
@@ -95,7 +93,7 @@ async def evening_check(state: dict):
 
 async def deep_wind_down(state: dict):
     """10pm. Hard floor: 2500K, 10%. Non-negotiable."""
-    from src.light import set_light
+    from .light import set_light
 
     device = state.get("light")
     if not device:
@@ -109,7 +107,7 @@ async def deep_wind_down(state: dict):
 
 async def bedtime_signal(state: dict):
     """Blink 10 times to signal: time to sleep. Ends with light OFF."""
-    from src.light import set_light, turn_off
+    from .light import set_light, turn_off
 
     device = state.get("light")
     if not device:

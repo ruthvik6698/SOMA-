@@ -3,14 +3,13 @@ SOMA decision loop: READ → SCORE → PRESCRIBE → ACT.
 """
 import json
 from datetime import datetime
-from pathlib import Path
 
 import pytz
 
+from .config import LOGS_DIR
 from .modes import MODE_PRESCRIPTIONS, MOOD_PRESCRIPTIONS
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-LOG_PATH = PROJECT_ROOT / "logs" / "soma.log"
+LOG_PATH = LOGS_DIR / "soma.log"
 IST = pytz.timezone("Asia/Kolkata")
 
 

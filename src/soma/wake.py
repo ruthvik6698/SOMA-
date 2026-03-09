@@ -2,10 +2,8 @@
 Morning wake: SOMA sunrise simulation (5:30–5:45) and alarm pulse (5:45).
 """
 import asyncio
-from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LOG_PATH = PROJECT_ROOT / "logs" / "scheduler.log"
+from .config import SCHEDULER_LOG as LOG_PATH
 
 
 def _log(msg: str):
@@ -34,7 +32,7 @@ def _yesterday_recovery(state: dict) -> str:
 
 async def sunrise_start(state: dict):
     """5:30am — SOMA: 2500K · 5% (near-dark amber)."""
-    from src.light import set_light
+    from .light import set_light
 
     device = state.get("light")
     if not device:
@@ -51,7 +49,7 @@ async def sunrise_ramp(state: dict):
     SOMA sunrise: 5:30–5:45. Steps every ~3 min.
     5:30→2500K 5%, 5:33→3000K 15%, 5:36→3500K 35%, 5:39→4200K 55%, 5:42→5000K 75%, 5:43→peak (recovery-adjusted)
     """
-    from src.light import set_light
+    from .light import set_light
 
     device = state.get("light")
     if not device:
@@ -85,7 +83,7 @@ async def sunrise_ramp(state: dict):
 
 async def alarm_pulse(state: dict):
     """5:45am — SOMA: Blink 3×. Wake signal. Hold at recovery-adjusted level."""
-    from src.light import set_light
+    from .light import set_light
 
     device = state.get("light")
     if not device:

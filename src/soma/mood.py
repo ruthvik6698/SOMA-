@@ -3,11 +3,6 @@ Mood input for SOMA: voice, text, quick-tap buttons.
 Mood overrides all scheduled settings; expires after 90 minutes.
 """
 import time
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LOG_PATH = PROJECT_ROOT / "logs" / "soma.log"
-
 
 VALID_MOODS = frozenset({"stressed", "flat", "focused", "winding_down", "energised"})
 

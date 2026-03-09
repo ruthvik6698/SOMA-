@@ -2,16 +2,14 @@
 import json
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
-HISTORY_PATH = DATA_DIR / "whoop_history.json"
+from .config import DATA_DIR, HISTORY_FILE
 
 
 def save_history(records: list) -> tuple[int, int, int]:
     """Merge records into history. Returns (total, new, updated)."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    if HISTORY_PATH.exists():
-        with open(HISTORY_PATH) as f:
+    if HISTORY_FILE.exists():
+        with open(HISTORY_FILE) as f:
             existing = json.load(f)
     else:
         existing = []
@@ -41,13 +39,13 @@ def save_history(records: list) -> tuple[int, int, int]:
             new_count += 1
 
     existing.sort(key=lambda x: x.get("date", ""), reverse=True)
-    with open(HISTORY_PATH, "w") as f:
+    with open(HISTORY_FILE, "w") as f:
         json.dump(existing, f, indent=2)
     return len(existing), new_count, updated_count
 
 
 def load_history() -> list:
-    if HISTORY_PATH.exists():
-        with open(HISTORY_PATH) as f:
+    if HISTORY_FILE.exists():
+        with open(HISTORY_FILE) as f:
             return json.load(f)
     return []
